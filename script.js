@@ -96,3 +96,106 @@ const items = [
     rating: 4.1,
   },
 ];
+
+
+const itemsContainer = document.querySelector("#shop-items");
+const itemTemplate = document.querySelector("#item-template");
+const nothingFound = document.querySelector("#nothing-found");
+
+function prepareShopItem(shopItem) {
+  const { title, description, tags, img, price, rating } = shopItem;
+  const item = itemTemplate.content.cloneNode(true);
+
+  item.querySelector("h1").textContent = title;
+  item.querySelector("p").textContent = description;
+  item.querySelector("img").src = img;
+  item.querySelector(".price").textContent = `${price}P`;
+
+  const ratingContainer = item.querySelector(".rating");
+
+  for (let i = 0; i < rating; i++) {
+    const star = document.createElement("i");
+    star.classList.add("fa", "fa-star");
+    ratingContainer.append(star);
+  }
+
+  const tagsHolder = item.querySelector(".tags")
+
+  tags.forEach((tag) => {
+    const element = document.createElement("span");
+    element.textContent = tag;
+    element.classList.add("tag");
+    tagsHolder.append(element);
+  }
+);
+
+  return item;
+}
+
+let currentState = [...items];
+
+function renderItems(arr) {
+  nothingFound.textContent = "";
+  itemsContainer.innerHTML = "";
+  arr.forEach((item) => {
+  itemsContainer.append(prepareShopItem(item));
+  }
+);
+if (!arr.length) {
+  nothingFound.textContent = "Ничего не найдено";
+}
+}
+renderItems(currentState);
+
+function sortByAlphabet(a, b) {
+if (a.title > b.title) {
+  return -1;
+}
+return 0;
+}
+
+renderItems(currentState.sort((a, b) => sortByAlphabet(a, b)));
+
+const sortControl = document.querySelector("#sort");
+sortControl = document.querySelector("#sort");
+sortControl.addEventListener("change", (event) => {
+  const selectedOption = event.target.value;
+  switch (selectedOption) {
+    case "expensive": {
+      currentState.sort((a, b) => b.price - a.price);
+      break;
+    }
+    case "cheap": {
+      currentState.sort((a, b) => a.price - b.price);
+      break;
+    }
+    case "rating": {
+      currentState.sort((a, b) => b.rating - a.rating);
+      break;
+    }
+    case "alphabet": {
+      currentState.sort((a, b) => sortByAlphabet(a, b));
+      break;
+    }
+  }
+}
+);
+
+const searchInput = document.querySelector("#search-input");
+const searchButton = document.querySelector("#search-btn");
+
+function applySearch() {
+  const searchString = searchInput.value.trim().toLowerCase();
+  currentState = items.filter((el) =>
+    el.title.toLowerCase().includes(searchString) ||
+   el.description.toLowerCase().includes(searchString)
+);
+currentState.sort(sortByAlphabet);
+sortControl.selectedIndex = 0;
+renderItems(currentState);
+}
+searchButton.addEventListener("click", applySearch);
+searchInput.addEventListener("keydown", (event) => { 
+  if (event.key === "Enter") applySearch();
+}
+);
