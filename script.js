@@ -157,7 +157,6 @@ return 0;
 renderItems(currentState.sort((a, b) => sortByAlphabet(a, b)));
 
 const sortControl = document.querySelector("#sort");
-sortControl = document.querySelector("#sort");
 sortControl.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
   switch (selectedOption) {
