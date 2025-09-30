@@ -104,7 +104,7 @@ const searchInput = document.querySelector("#search-input");
 const searchButton = document.querySelector("#search-btn");
 const sortControl = document.querySelector("#sort");
 
-// Функция для подготовки карточки товара
+
 function prepareShopItem(shopItem) {
   const { title, description, tags, img, price, rating } = shopItem;
   const item = itemTemplate.content.cloneNode(true);
@@ -115,7 +115,7 @@ function prepareShopItem(shopItem) {
   item.querySelector(".price").textContent = `${price}P`;
 
   const ratingContainer = item.querySelector(".rating");
-  ratingContainer.innerHTML = ""; // очистить перед добавлением звезд
+  ratingContainer.innerHTML = ""; 
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
 
@@ -131,7 +131,7 @@ function prepareShopItem(shopItem) {
   }
 
   const tagsHolder = item.querySelector(".tags");
-  tagsHolder.innerHTML = ""; // очистить перед добавлением тегов
+  tagsHolder.innerHTML = ""; 
   tags.forEach((tag) => {
     const element = document.createElement("span");
     element.textContent = tag;
@@ -144,7 +144,7 @@ function prepareShopItem(shopItem) {
 
 let currentState = [...items];
 
-// Функция для отображения товаров
+
 function renderItems(arr) {
   nothingFound.textContent = "";
   itemsContainer.innerHTML = "";
@@ -157,7 +157,7 @@ function renderItems(arr) {
   });
 }
 
-// Функция сортировки по алфавиту
+
 function sortByAlphabet(a, b) {
   const titleA = a.title.toLowerCase();
   const titleB = b.title.toLowerCase();
@@ -166,11 +166,11 @@ function sortByAlphabet(a, b) {
   return 0;
 }
 
-// Изначально сортируем по алфавиту
+
 currentState.sort((a, b) => sortByAlphabet(a, b));
 renderItems(currentState);
 
-// Обработка изменения сортировки
+
 sortControl.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
   switch (selectedOption) {
@@ -190,11 +190,9 @@ sortControl.addEventListener("change", (event) => {
   renderItems(currentState);
 });
 
-// Обработка поиска по кнопке и по Enter
 function applySearch() {
   const searchString = searchInput.value.trim().toLowerCase();
   if (searchString === "") {
-    // если строка пустая, показываем все товары
     currentState = [...items];
     currentState.sort((a, b) => sortByAlphabet(a, b));
   } else {
@@ -203,10 +201,10 @@ function applySearch() {
         el.title.toLowerCase().includes(searchString) ||
         el.description.toLowerCase().includes(searchString)
     );
-    // сортируем по алфавиту при поиске
+
     currentState.sort((a, b) => sortByAlphabet(a, b));
   }
-  // сбрасываем сортировку селектор в дефолтное значение (например, "alphabet")
+ 
   sortControl.value = "alphabet";
   renderItems(currentState);
 }
@@ -218,7 +216,6 @@ searchInput.addEventListener("keydown", (event) => {
   }
 });
 
-// Обработка очистки поля поиска (когда пользователь стирает текст)
 searchInput.addEventListener("input", () => {
   if (searchInput.value.trim() === "") {
     currentState = [...items];
