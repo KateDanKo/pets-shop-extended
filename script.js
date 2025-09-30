@@ -97,11 +97,14 @@ const items = [
   },
 ];
 
-
 const itemsContainer = document.querySelector("#shop-items");
 const itemTemplate = document.querySelector("#item-template");
 const nothingFound = document.querySelector("#nothing-found");
+const searchInput = document.querySelector("#search-input");
+const searchButton = document.querySelector("#search-btn");
+const sortControl = document.querySelector("#sort");
 
+// Функция для подготовки карточки товара
 function prepareShopItem(shopItem) {
   const { title, description, tags, img, price, rating } = shopItem;
   const item = itemTemplate.content.cloneNode(true);
@@ -112,91 +115,114 @@ function prepareShopItem(shopItem) {
   item.querySelector(".price").textContent = `${price}P`;
 
   const ratingContainer = item.querySelector(".rating");
+  ratingContainer.innerHTML = ""; // очистить перед добавлением звезд
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating - fullStars >= 0.5;
 
-  for (let i = 0; i < rating; i++) {
+  for (let i = 0; i < fullStars; i++) {
     const star = document.createElement("i");
     star.classList.add("fa", "fa-star");
     ratingContainer.append(star);
   }
+  if (hasHalfStar) {
+    const halfStar = document.createElement("i");
+    halfStar.classList.add("fa", "fa-star-half-alt");
+    ratingContainer.append(halfStar);
+  }
 
-  const tagsHolder = item.querySelector(".tags")
-
+  const tagsHolder = item.querySelector(".tags");
+  tagsHolder.innerHTML = ""; // очистить перед добавлением тегов
   tags.forEach((tag) => {
     const element = document.createElement("span");
     element.textContent = tag;
     element.classList.add("tag");
     tagsHolder.append(element);
-  }
-);
+  });
 
   return item;
 }
 
 let currentState = [...items];
 
+// Функция для отображения товаров
 function renderItems(arr) {
   nothingFound.textContent = "";
   itemsContainer.innerHTML = "";
+  if (arr.length === 0) {
+    nothingFound.textContent = "Ничего не найдено";
+    return;
+  }
   arr.forEach((item) => {
-  itemsContainer.append(prepareShopItem(item));
-  }
-);
-if (!arr.length) {
-  nothingFound.textContent = "Ничего не найдено";
-}
+    itemsContainer.append(prepareShopItem(item));
+  });
 }
 
+// Функция сортировки по алфавиту
 function sortByAlphabet(a, b) {
-  if (a.title.toLowerCase() > b.title.toLowerCase()) {
-    return 1;
-  } else if (a.title.toLowerCase() < b.title.toLowerCase()) {
-    return -1;
-  } else {
-    return 0;
-  }
+  const titleA = a.title.toLowerCase();
+  const titleB = b.title.toLowerCase();
+  if (titleA > titleB) return 1;
+  if (titleA < titleB) return -1;
+  return 0;
 }
 
-renderItems(currentState.sort((a, b) => sortByAlphabet(a, b)));
+// Изначально сортируем по алфавиту
+currentState.sort((a, b) => sortByAlphabet(a, b));
+renderItems(currentState);
 
-const sortControl = document.querySelector("#sort");
+// Обработка изменения сортировки
 sortControl.addEventListener("change", (event) => {
   const selectedOption = event.target.value;
   switch (selectedOption) {
-    case "expensive": {
+    case "expensive":
       currentState.sort((a, b) => b.price - a.price);
       break;
-    }
-    case "cheap": {
+    case "cheap":
       currentState.sort((a, b) => a.price - b.price);
       break;
-    }
-    case "rating": {
+    case "rating":
       currentState.sort((a, b) => b.rating - a.rating);
       break;
-    }
-    case "alphabet": {
+    case "alphabet":
       currentState.sort((a, b) => sortByAlphabet(a, b));
       break;
-    }
   }
   renderItems(currentState);
-}
-);
+});
 
-const searchInput = document.querySelector("#search-input");
-const searchButton = document.querySelector("#search-btn");
-
+// Обработка поиска по кнопке и по Enter
 function applySearch() {
   const searchString = searchInput.value.trim().toLowerCase();
-  currentState = items.filter((el) =>
-    el.title.toLowerCase().includes(searchString) ||
-   el.description.toLowerCase().includes(searchString)
-);
-currentState.sort((a, b) => sortByAlphabet(a, b));
-sortControl.selectedIndex = 0;
-renderItems(currentState);
+  if (searchString === "") {
+    // если строка пустая, показываем все товары
+    currentState = [...items];
+    currentState.sort((a, b) => sortByAlphabet(a, b));
+  } else {
+    currentState = items.filter(
+      (el) =>
+        el.title.toLowerCase().includes(searchString) ||
+        el.description.toLowerCase().includes(searchString)
+    );
+    // сортируем по алфавиту при поиске
+    currentState.sort((a, b) => sortByAlphabet(a, b));
+  }
+  // сбрасываем сортировку селектор в дефолтное значение (например, "alphabet")
+  sortControl.value = "alphabet";
+  renderItems(currentState);
 }
+
 searchButton.addEventListener("click", applySearch);
-searchInput.addEventListener("search", applySearch);
+searchInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    applySearch();
+  }
+});
 
-
+// Обработка очистки поля поиска (когда пользователь стирает текст)
+searchInput.addEventListener("input", () => {
+  if (searchInput.value.trim() === "") {
+    currentState = [...items];
+    currentState.sort((a, b) => sortByAlphabet(a, b));
+    renderItems(currentState);
+  }
+});
