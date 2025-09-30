@@ -145,13 +145,15 @@ if (!arr.length) {
   nothingFound.textContent = "Ничего не найдено";
 }
 }
-renderItems(currentState);
 
 function sortByAlphabet(a, b) {
-if (a.title > b.title) {
-  return -1;
-}
-return 0;
+  if (a.title.toLowerCase() > b.title.toLowerCase()) {
+    return 1;
+  } else if (a.title.toLowerCase() < b.title.toLowerCase()) {
+    return -1;
+  } else {
+    return 0;
+  }
 }
 
 renderItems(currentState.sort((a, b) => sortByAlphabet(a, b)));
@@ -177,6 +179,7 @@ sortControl.addEventListener("change", (event) => {
       break;
     }
   }
+  renderItems(currentState);
 }
 );
 
@@ -189,12 +192,11 @@ function applySearch() {
     el.title.toLowerCase().includes(searchString) ||
    el.description.toLowerCase().includes(searchString)
 );
-currentState.sort(sortByAlphabet);
+currentState.sort((a, b) => sortByAlphabet(a, b));
 sortControl.selectedIndex = 0;
 renderItems(currentState);
 }
 searchButton.addEventListener("click", applySearch);
-searchInput.addEventListener("keydown", (event) => { 
-  if (event.key === "Enter") applySearch();
-}
-);
+searchInput.addEventListener("search", applySearch);
+
+
